@@ -18,7 +18,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_COMPILE_WARNING_AS_ERROR)
 set(CMAKE_GENERATOR "Ninja")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_BUILD_TYPE Debug) # TODO change type to Release for build commitment
+
 message("generator is set to ${CMAKE_GENERATOR}")
+message("Generated with config types: ${CMAKE_BUILD_TYPE}")
 
 
 # Включите подпроекты.

@@ -36,7 +36,7 @@
 			{
 				"command" : 1,
 				"file" : 1,
-				"line" : 25,
+				"line" : 28,
 				"parent" : 2
 			}
 		]
@@ -44,6 +44,12 @@
 	"compileGroups" : 
 	[
 		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "-g"
+				}
+			],
 			"includes" : 
 			[
 				{

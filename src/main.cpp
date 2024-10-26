@@ -1,13 +1,10 @@
 
-#include "ufo_torrent.h"
-
 #include <boost/any.hpp>
 #include <boost/multiprecision/cpp_bin_float.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <iomanip>
 #include <iostream>
 #include <ncurses.h>
-#include <string.h>
 
 int main()
 {

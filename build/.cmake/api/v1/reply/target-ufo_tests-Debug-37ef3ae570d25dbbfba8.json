@@ -84,7 +84,7 @@
 			{
 				"command" : 5,
 				"file" : 4,
-				"line" : 25,
+				"line" : 28,
 				"parent" : 10
 			}
 		]
@@ -94,6 +94,9 @@
 		{
 			"compileCommandFragments" : 
 			[
+				{
+					"fragment" : "-g"
+				},
 				{
 					"backtrace" : 2,
 					"fragment" : "-DGTEST_HAS_PTHREAD=1"
@@ -125,6 +128,10 @@
 	{
 		"commandFragments" : 
 		[
+			{
+				"fragment" : "-g",
+				"role" : "flags"
+			},
 			{
 				"fragment" : "",
 				"role" : "flags"

@@ -35,7 +35,7 @@
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 29,
+				"line" : 25,
 				"parent" : 0
 			},
 			{
@@ -44,19 +44,19 @@
 			{
 				"command" : 2,
 				"file" : 1,
-				"line" : 29,
+				"line" : 32,
 				"parent" : 3
 			},
 			{
 				"command" : 3,
 				"file" : 1,
-				"line" : 25,
+				"line" : 28,
 				"parent" : 3
 			},
 			{
 				"command" : 4,
 				"file" : 0,
-				"line" : 35,
+				"line" : 31,
 				"parent" : 0
 			}
 		]
@@ -67,7 +67,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-std=gnu++20"
+					"fragment" : "-g -std=gnu++20"
 				},
 				{
 					"backtrace" : 4,
@@ -136,6 +136,10 @@
 	{
 		"commandFragments" : 
 		[
+			{
+				"fragment" : "-g",
+				"role" : "flags"
+			},
 			{
 				"fragment" : "",
 				"role" : "flags"

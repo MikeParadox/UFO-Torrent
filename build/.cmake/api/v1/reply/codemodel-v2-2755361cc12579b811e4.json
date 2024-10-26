@@ -11,7 +11,7 @@
 						1,
 						2
 					],
-					"jsonFile" : "directory-.-f5ebdc15457944623624.json",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.8"
@@ -21,7 +21,7 @@
 				},
 				{
 					"build" : "src",
-					"jsonFile" : "directory-src-b6cf2213fc5053b67c22.json",
+					"jsonFile" : "directory-src-Debug-b6cf2213fc5053b67c22.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.8"
@@ -37,7 +37,7 @@
 				},
 				{
 					"build" : "tests",
-					"jsonFile" : "directory-tests-b01f6abb0ab61427ef3b.json",
+					"jsonFile" : "directory-tests-Debug-b01f6abb0ab61427ef3b.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.8"
@@ -51,7 +51,7 @@
 					]
 				}
 			],
-			"name" : "",
+			"name" : "Debug",
 			"projects" : 
 			[
 				{
@@ -75,21 +75,21 @@
 				{
 					"directoryIndex" : 1,
 					"id" : "Testing::@145eef247bfb46b6828c",
-					"jsonFile" : "target-Testing-4e7e92202d871190ae10.json",
+					"jsonFile" : "target-Testing-Debug-5581a084fa5d6be6e91a.json",
 					"name" : "Testing",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 2,
 					"id" : "ufo_tests::@a44f0ac069e85531cdee",
-					"jsonFile" : "target-ufo_tests-4d63cf702213cb46000b.json",
+					"jsonFile" : "target-ufo_tests-Debug-37ef3ae570d25dbbfba8.json",
 					"name" : "ufo_tests",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 1,
 					"id" : "ufo_torrent::@145eef247bfb46b6828c",
-					"jsonFile" : "target-ufo_torrent-6888ed3c8a983aea5bde.json",
+					"jsonFile" : "target-ufo_torrent-Debug-82c88c960c2c3bb2b48c.json",
 					"name" : "ufo_torrent",
 					"projectIndex" : 0
 				}
