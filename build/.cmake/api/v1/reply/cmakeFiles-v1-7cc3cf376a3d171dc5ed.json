@@ -21,7 +21,7 @@
 		{
 			"isCMake" : true,
 			"isExternal" : true,
-			"path" : "/usr/share/cmake-3.28/Modules/CMakeUnixFindMake.cmake"
+			"path" : "/usr/share/cmake-3.28/Modules/CMakeNinjaFindMake.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -276,7 +276,7 @@
 		{
 			"isCMake" : true,
 			"isExternal" : true,
-			"path" : "/usr/share/cmake-3.28/Modules/Compiler/GNU-FindBinUtils.cmake"
+			"path" : "/usr/share/cmake-3.28/Modules/Compiler/Clang-FindBinUtils.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -325,7 +325,17 @@
 		{
 			"isCMake" : true,
 			"isExternal" : true,
-			"path" : "/usr/share/cmake-3.28/Modules/Compiler/GNU-CXX.cmake"
+			"path" : "/usr/share/cmake-3.28/Modules/Compiler/Clang-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Compiler/Clang.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Compiler/CMakeCommonCompilerMacros.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -336,6 +346,11 @@
 			"isCMake" : true,
 			"isExternal" : true,
 			"path" : "/usr/share/cmake-3.28/Modules/Compiler/CMakeCommonCompilerMacros.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake-3.28/Modules/Platform/Linux-Clang-CXX.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -448,37 +463,6 @@
 			"isCMake" : true,
 			"isExternal" : true,
 			"path" : "/usr/share/cmake-3.28/Modules/FindPackageMessage.cmake"
-		},
-		{
-			"isCMake" : true,
-			"isExternal" : true,
-			"path" : "/usr/share/cmake-3.28/Modules/FindBoost.cmake"
-		},
-		{
-			"isCMake" : true,
-			"isExternal" : true,
-			"path" : "/usr/share/cmake-3.28/Modules/FindPackageHandleStandardArgs.cmake"
-		},
-		{
-			"isCMake" : true,
-			"isExternal" : true,
-			"path" : "/usr/share/cmake-3.28/Modules/FindPackageMessage.cmake"
-		},
-		{
-			"isExternal" : true,
-			"path" : "/usr/lib/cmake/Boost-1.80.0/BoostConfigVersion.cmake"
-		},
-		{
-			"isExternal" : true,
-			"path" : "/usr/lib/cmake/Boost-1.80.0/BoostConfig.cmake"
-		},
-		{
-			"isExternal" : true,
-			"path" : "/usr/lib/cmake/boost_headers-1.80.0/boost_headers-config-version.cmake"
-		},
-		{
-			"isExternal" : true,
-			"path" : "/usr/lib/cmake/boost_headers-1.80.0/boost_headers-config.cmake"
 		},
 		{
 			"isCMake" : true,

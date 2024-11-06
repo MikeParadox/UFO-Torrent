@@ -1,6 +1,8 @@
 ﻿# CMakeList.txt: файл проекта CMake верхнего уровня; проведите глобальную конфигурацию
 # и включите сюда подпроекты.
 #
+set(CMAKE_CXX_COMPILER "/usr/bin/clang++")                
+
 cmake_minimum_required (VERSION 3.8)
 
 project ("ufo_torrent"
@@ -16,11 +18,9 @@ endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_COMPILE_WARNING_AS_ERROR)
-set(CMAKE_GENERATOR "Ninja")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_BUILD_TYPE Debug) # TODO change type to Release for build commitment
 
-message("generator is set to ${CMAKE_GENERATOR}")
 message("Generated with config types: ${CMAKE_BUILD_TYPE}")
 
 
@@ -29,6 +29,6 @@ include_directories(includes)
 add_subdirectory ("src")
 add_subdirectory("tests")
 
-target_compile_options(${PROJECT_NAME} PRIVATE -std=c++2b -fopenmp
--g -ggdb 
--Werror -Wall -Wpedantic -Wno-parentheses)
+
+target_compile_options(main PRIVATE -std=c++2b -fopenmp
+-g -ggdb -Werror -Wall -Wpedantic -Wno-parentheses)
