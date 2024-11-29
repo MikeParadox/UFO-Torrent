@@ -1,0 +1,1005 @@
+[1mdiff --git a/build/exemple.torrent b/build/exemple.torrent[m
+[1mnew file mode 100644[m
+[1mindex 0000000..4b92bc0[m
+Binary files /dev/null and b/build/exemple.torrent differ
+[1mdiff --git a/includes/createHash.h b/includes/createHash.h[m
+[1mnew file mode 100644[m
+[1mindex 0000000..a09f20f[m
+[1m--- /dev/null[m
+[1m+++ b/includes/createHash.h[m
+[36m@@ -0,0 +1,19 @@[m
+[32m+[m[32m#ifndef CREATEHASH_H[m
+[32m+[m[32m#define CREATEHASH_H[m
+[32m+[m
+[32m+[m[32m#include "./fileUtils.h"[m
+[32m+[m[32m#include <vector>[m
+[32m+[m[32m#include <boost/uuid/detail/sha1.hpp>[m
+[32m+[m[32m#include <string>[m
+[32m+[m[32m#include <stdexcept>[m
+[32m+[m
+[32m+[m[32musing std::vector;[m
+[32m+[m
+[32m+[m[32mnamespace Hash {[m
+[32m+[m
+[32m+[m[32m    unsigned long long choosePieceLength(unsigned long long fileSize);[m
+[32m+[m
+[32m+[m[32m    std::string createHash(const std::vector<string>& filePaths, size_t chunk_size);[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m#endif[m
+\ No newline at end of file[m
+[1mdiff --git a/includes/decode.h b/includes/decode.h[m
+[1mindex 4aa75f0..1376f48 100644[m
+[1m--- a/includes/decode.h[m
+[1m+++ b/includes/decode.h[m
+[36m@@ -5,14 +5,15 @@[m
+ [m
+ [m
+ [m
+[31m-namespace bencode {[m
+[32m+[m[32mnamespace bencode[m[41m [m
+[32m+[m[32m{[m
+ [m
+ 	class Decoder[m
+ 	{[m
+[31m-		[m
+[32m+[m
+ 	public:[m
+[31m-		[m
+[31m-		friend struct Str;[m
+[32m+[m
+[32m+[m		[32mfriend struct Dr;[m
+ 		// Декодирование строки[m
+ 		static Value decode(const std::string& string);[m
+ [m
+[36m@@ -21,10 +22,10 @@[m [mnamespace bencode {[m
+ 		static std::string firstDigit(const std::string& str);[m
+ [m
+ 		// Декодирования первого инта в строке[m
+[31m-		static std::pair<long long, int> decodeInt(const std::string& s);[m
+[32m+[m		[32mstatic std::pair<unsigned long long, int> decodeInt(const std::string& s);[m
+ [m
+ 		// Декодирование первого стринга в строке[m
+[31m-		static std::pair<std::string, int> decodeString(const std::string& s);[m
+[32m+[m		[32mstatic std::pair<std::string, int> decodestring(const std::string& s);[m
+ [m
+ 		// Декодирования листа[m
+ 		static std::pair<ValueVector, int> decodeList(const std::string& s);[m
+[36m@@ -35,10 +36,13 @@[m [mnamespace bencode {[m
+ 		// Декодирования всей строки рекурсией[m
+ 		static std::pair<Value, int> _decode(const std::string& s);[m
+ 	};[m
+[31m-	struct Str {[m
+[31m-		std::pair<std::string, int> decodeStr(const std::string& s);[m
+[32m+[m	[32mstruct Dr[m
+[32m+[m	[32m{[m
+[32m+[m		[32mstd::pair<ValueVector, int> decodeLst(const std::string& s);[m
+ 		Decoder decoder;[m
+ 	};[m
+[32m+[m
+[32m+[m
+ }[m
+ [m
+ #endif[m
+\ No newline at end of file[m
+[1mdiff --git a/includes/fileUtils.h b/includes/fileUtils.h[m
+[1mnew file mode 100644[m
+[1mindex 0000000..469d278[m
+[1m--- /dev/null[m
+[1m+++ b/includes/fileUtils.h[m
+[36m@@ -0,0 +1,21 @@[m
+[32m+[m[32m#ifndef FILEUTILS_H[m
+[32m+[m[32m#define FILEUTILS_H[m
+[32m+[m
+[32m+[m[32m#include <string>[m
+[32m+[m[32m#include <vector>[m
+[32m+[m[32m#include <fstream>[m
+[32m+[m[32m#include <filesystem>[m
+[32m+[m
+[32m+[m[32musing std::string;[m
+[32m+[m[32musing std::vector;[m
+[32m+[m
+[32m+[m[32mnamespace File {[m
+[32m+[m
+[32m+[m	[32mstring read(const std::string& filePath);[m
+[32m+[m
+[32m+[m	[32munsigned long long getFileSize(const std::string& filename);[m
+[32m+[m
+[32m+[m	[32mvoid createFile(const std::string& filePath, const std::string& content);[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m#endif[m
+\ No newline at end of file[m
+[1mdiff --git a/includes/torrentFile.h b/includes/torrentFile.h[m
+[1mnew file mode 100644[m
+[1mindex 0000000..a495a2f[m
+[1m--- /dev/null[m
+[1m+++ b/includes/torrentFile.h[m
+[36m@@ -0,0 +1,69 @@[m
+[32m+[m[32m#ifndef TORRENTFILE_H[m
+[32m+[m[32m#define TORRENTFILE_H[m
+[32m+[m
+[32m+[m[32m#include <boost/variant.hpp>[m
+[32m+[m[32m#include <ctime>[m
+[32m+[m[32m#include <optional>[m
+[32m+[m[32m#include <stdexcept>[m
+[32m+[m[32m#include "valueTypes.h"[m
+[32m+[m[32m#include "createHash.h"[m
+[32m+[m[32m#include "fileUtils.h"[m
+[32m+[m
+[32m+[m[32musing std::string;[m
+[32m+[m[32musing std::vector;[m
+[32m+[m[32musing std::optional;[m
+[32m+[m
+[32m+[m[32musing namespace bencode;[m
+[32m+[m
+[32m+[m[32mnamespace Torrent {[m
+[32m+[m
+[32m+[m[32m    // Структура для представления файлов внутри торрента[m
+[32m+[m[32m    struct TorrentFileInfo {[m
+[32m+[m[32m        unsigned long long length;                      // Размер файла в байтах[m
+[32m+[m[32m        vector<string> path;                            // Путь к файлу (например, ["data.bin"])[m
+[32m+[m[32m    };[m
+[32m+[m
+[32m+[m[32m    // Основная структура для описания торрента[m
+[32m+[m[32m    struct TorrentFile {[m
+[32m+[m
+[32m+[m[32m        string announce;                                // Основной трекер[m
+[32m+[m[32m        vector<vector<string>> announceList;            // Альтернативные трекеры[m
+[32m+[m[32m        optional<string> createdBy;                     // Кто создал (если есть)[m
+[32m+[m[32m        optional<time_t> creationDate;                  // Дата создания (UNIX Timestamp)[m
+[32m+[m
+[32m+[m[32m        struct Info {[m
+[32m+[m[32m            vector<TorrentFileInfo> files;              // Список файлов[m
+[32m+[m[32m            string name;                                // Имя файла или папки[m
+[32m+[m[32m            unsigned long long pieceLength;             // Размер одной части (в байтах)[m
+[32m+[m[32m            string pieces;                              // Хеши всех частей (бинарные данные)[m
+[32m+[m[32m        } info;[m
+[32m+[m[32m    };[m
+[32m+[m
+[32m+[m[32m    struct ValueToField : public boost::static_visitor<> {[m
+[32m+[m[32m        TorrentFile& torrent;[m
+[32m+[m[32m        TorrentFile::Info& info;[m
+[32m+[m
+[32m+[m[32m        explicit ValueToField(TorrentFile& t)[m
+[32m+[m[32m            : torrent(t), info(t.info) {}[m
+[32m+[m
+[32m+[m[32m        void operator()(int value) const;[m
+[32m+[m
+[32m+[m[32m        void operator()(const string& value) const;[m
+[32m+[m
+[32m+[m[32m        void operator()(const ValueVector& values) const;[m
+[32m+[m
+[32m+[m[32m        void operator()(const ValueDictionary& dict) const;[m
+[32m+[m
+[32m+[m[32m        mutable string currentKey;[m
+[32m+[m[32m        mutable TorrentFileInfo currentFile;[m
+[32m+[m[32m    };[m
+[32m+[m
+[32m+[m[32m    // Функция для преобразования value в TorrentFile[m
+[32m+[m[32m    TorrentFile parseTorrentFile(const Value& data);[m
+[32m+[m
+[32m+[m[32m    Value toValue(const TorrentFile& torrent);[m
+[32m+[m
+[32m+[m[32m    TorrentFile createTorrentFile(const string& announce,  const vector<vector<string>>& announceList, const string& name, const string& folderPath, optional<string> createdBy = std::nullopt, optional<time_t> creationDate = std::nullopt);[m
+[32m+[m[32m};[m
+[32m+[m
+[32m+[m[32m#endif[m
+\ No newline at end of file[m
+[1mdiff --git a/includes/valueTypes.h b/includes/valueTypes.h[m
+[1mindex 8ce22b3..7bbce24 100644[m
+[1m--- a/includes/valueTypes.h[m
+[1m+++ b/includes/valueTypes.h[m
+[36m@@ -9,8 +9,8 @@[m
+ [m
+ namespace bencode {[m
+ [m
+[31m-    using Value = boost::make_recursive_variant<int, long long, std::string, std::vector<boost::recursive_variant_>, std::map<std::string, boost::recursive_variant_>>::type;[m
+[31m-    using ValueDictionary = std::map<std::string, Value>;[m
+[32m+[m[32m    using Value = boost::make_recursive_variant<int, unsigned long long, std::string, std::vector<boost::recursive_variant_>, std::unordered_map<std::string, boost::recursive_variant_>>::type;[m
+[32m+[m[32m    using ValueDictionary = std::unordered_map<std::string, Value>;[m
+     using ValueVector = std::vector<Value>;[m
+ [m
+ };[m
+[1mdiff --git a/src/CMakeLists.txt b/src/CMakeLists.txt[m
+[1mindex 0f60003..0679794 100644[m
+[1m--- a/src/CMakeLists.txt[m
+[1m+++ b/src/CMakeLists.txt[m
+[36m@@ -10,10 +10,12 @@[m [minclude_directories(${CURSES_INDLUDE_DIRS})[m
+ find_package(Boost REQUIRED)[m
+ include_directories(${Boost_INCLUDE_DIRS}) [m
+ [m
+[31m-add_library(Testing ../includes/ufo_torrent.h ufo_torrent.cpp [m
+[32m+[m[32madd_library(Testing ../includes/ufo_torrent.h ufo_torrent.cpp ./models/torrentFile.cpp[m
+                       ./bencode/decode.cpp[m
+                       ./bencode/prettyPrinter.cpp[m
+[31m-                      ./bencode/encode.cpp)[m
+[32m+[m[32m                      ./bencode/encode.cpp[m
+[32m+[m[32m                      ./hashing/createHash.cpp[m
+[32m+[m[32m                      ./utils/fileUtils.cpp)[m
+ [m
+ add_executable(${PROJECT_NAME} main.cpp)[m
+ [m
+[1mdiff --git a/src/bencode/decode.cpp b/src/bencode/decode.cpp[m
+[1mindex 4c6e204..bef485a 100644[m
+[1m--- a/src/bencode/decode.cpp[m
+[1m+++ b/src/bencode/decode.cpp[m
+[36m@@ -2,18 +2,18 @@[m
+ #include <boost/variant.hpp>[m
+ #include <boost/lexical_cast.hpp>[m
+ #include <stdexcept>[m
+[32m+[m[32m#include <iostream>[m
+[32m+[m[32m#include <future>[m
+ #include <tuple>[m
+ [m
+ using namespace bencode;[m
+ using std::string;[m
+ using std::pair;[m
+[31m-using std::string;[m
+[31m-[m
+ [m
+ [m
+[31m-bool stringToLongLong(const std::string& str, long long& result) {[m
+[32m+[m[32mbool stringToLongLong(const std::string& str, unsigned long long& result) {[m
+     try {[m
+[31m-        result = boost::lexical_cast<long long>(str);[m
+[32m+[m[32m        result = boost::lexical_cast<unsigned long long>(str);[m
+         return true;[m
+     }[m
+     catch (const boost::bad_lexical_cast&) {[m
+[36m@@ -21,78 +21,75 @@[m [mbool stringToLongLong(const std::string& str, long long& result) {[m
+     }[m
+ }[m
+ [m
+[31m-// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.[m
+ string Decoder::firstDigit(const string& str) {[m
+[31m-    std::string number;[m
+[32m+[m[32m    string number;[m
+     for (int i = 0; i < str.size(); ++i) {[m
+         if (isdigit(str[i]))[m
+             number += str[i];[m
+         else if (!number.empty())[m
+             break;[m
+     }[m
+[31m-    return number; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ[m
+[32m+[m[32m    return number;[m
+ }[m
+ [m
+[31m-// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ Bencode.[m
+[31m-// пїЅпїЅпїЅпїЅпїЅпїЅ: "i<пїЅпїЅпїЅпїЅпїЅ>e" (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, "i42e" -> 42).[m
+[31m-pair<long long, int> Decoder::decodeInt(const string& s) {[m
+[31m-    size_t eIndex = s.find_first_of('e'); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ 'e', пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ[m
+[32m+[m[32mpair<unsigned long long, int> Decoder::decodeInt(const string& s) {[m
+[32m+[m[32m    size_t eIndex = s.find_first_of('e');[m
+     [m
+[31m-    long long value;[m
+[32m+[m[32m    unsigned long long value;[m
+     if (stringToLongLong(s.substr(1, eIndex - 1), value))[m
+[31m-        return pair<long long, int>(value, eIndex + 1);[m
+[32m+[m[32m        return pair<unsigned long long, int>(value, eIndex + 1);[m
+     else[m
+         throw std::invalid_argument("Wrong int in file");[m
+ }[m
+ [m
+[31m-// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ Bencode.[m
+[31m-// пїЅпїЅпїЅпїЅпїЅпїЅ: "<пїЅпїЅпїЅпїЅпїЅ>:<пїЅпїЅпїЅпїЅпїЅпїЅ>" (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, "4:spam" -> "spam").[m
+[31m-pair<string, int> Decoder::decodeString(const string& s) {[m
+[32m+[m[32mpair<string, int> Decoder::decodestring(const string& s) {[m
+[32m+[m[32m    if (!isdigit(s[0]))[m[41m [m
+[32m+[m[32m        throw std::invalid_argument("Wrong file struct");[m
+[32m+[m
+     string lengthPart = firstDigit(s);[m
+[31m-    size_t digitsInString = lengthPart.size();[m
+[32m+[m[32m    size_t digitsInstring = lengthPart.size();[m
+ [m
+     int length = stoi(lengthPart);[m
+ [m
+[32m+[m[32m    if (digitsInstring + 1 + length > s.size() || s[digitsInstring + 1] == ':')[m
+[32m+[m[32m        throw std::invalid_argument("Wrong file struct");[m
+[32m+[m
+     return pair<string, int>([m
+[31m-        s.substr(digitsInString + 1, length),[m
+[31m-        digitsInString + 1 + length[m
+[32m+[m[32m        s.substr(digitsInstring + 1, length),[m
+[32m+[m[32m        digitsInstring + 1 + length[m
+     );[m
+ }[m
+ [m
+[31m-// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ Bencode.[m
+[31m-// пїЅпїЅпїЅпїЅпїЅпїЅ: "l<пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ>e" (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, "l4:spami42ee" -> ["spam", 42]).[m
+ pair<ValueVector, int> Decoder::decodeList(const string& s) {[m
+[31m-    ValueVector xs; // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ[m
+[31m-    int index = 1;  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ 'l'[m
+[32m+[m[32m    ValueVector xs;[m[41m [m
+[32m+[m[32m    int index = 1;[m[41m [m
+ [m
+     while (index < s.length()) {[m
+         char currentChar = s[index];[m
+[31m-        if (currentChar == 'e') { // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 'e', пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ[m
+[32m+[m[32m        if (currentChar == 'e') {[m
+             index += 1;[m
+             break;[m
+         }[m
+ [m
+         int i = 0;[m
+         Value b;[m
+[31m-        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ[m
+[32m+[m
+         std::tie(b, i) = (_decode(s.substr(index)));[m
+ [m
+[31m-        xs.push_back(b); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ[m
+[31m-        index += i;      // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ[m
+[32m+[m[32m        xs.push_back(b);[m[41m [m
+[32m+[m[32m        index += i;[m[41m    [m
+     }[m
+ [m
+[31m-    return pair<ValueVector, int>(xs, index); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ[m
+[32m+[m[32m    return pair<ValueVector, int>(xs, index);[m
+ }[m
+ [m
+[31m-// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ Bencode.[m
+[31m-// пїЅпїЅпїЅпїЅпїЅпїЅ: "d<пїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ>e" (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, "d3:cat4:spami42ee" -> {"cat": "spam", "age": 42}).[m
+ pair<ValueDictionary, int> Decoder::decodeDict(const string& s) {[m
+[31m-    ValueDictionary dict; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ[m
+[31m-    int index = 1;        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ 'd'[m
+[32m+[m[32m    ValueDictionary dict;[m[41m [m
+[32m+[m[32m    int index = 1;[m[41m [m
+ [m
+     while (index < s.length()) {[m
+         char currentChar = s[index];[m
+[31m-        if (currentChar == 'e') { // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 'e', пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ[m
+[32m+[m[32m        if (currentChar == 'e') {[m[41m [m
+             index += 1;[m
+             break;[m
+         }[m
+[36m@@ -102,69 +99,61 @@[m [mpair<ValueDictionary, int> Decoder::decodeDict(const string& s) {[m
+         Value value;[m
+         int i2;[m
+ [m
+[31m-        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅ)[m
+[32m+[m
+         std::tie(key, i1) = _decode(s.substr(index));[m
+[31m-        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ[m
+         std::tie(value, i2) = _decode(s.substr(index + i1));[m
+ [m
+[31m-        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ[m
+         dict[boost::get<string>(key)] = value;[m
+[31m-        index += i1 + i2; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ[m
+[32m+[m[32m        index += i1 + i2;[m
+     }[m
+ [m
+[31m-    return pair<ValueDictionary, int>(dict, index); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ[m
+[32m+[m[32m    return pair<ValueDictionary, int>(dict, index);[m[41m [m
+ }[m
+ [m
+[31m-// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ[m
+[31m-// (пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ).[m
+ pair<Value, int> Decoder::_decode(const string& s) {[m
+[31m-    int index = 0; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ[m
+[32m+[m[32m    int index = 0;[m
+ [m
+[31m-    // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ[m
+     pair<Value, int> result;[m
+     pair<ValueVector, int> pairList;[m
+     pair<ValueDictionary, int> pairDict;[m
+[31m-    pair<long long, int> pairInt;[m
+[31m-    pair<string, int> pairString;[m
+[32m+[m[32m    pair<unsigned long long, int> pairInt;[m
+[32m+[m[32m    pair<string, int> pairstring;[m
+ [m
+     while (0 < s.length()) {[m
+         char currChar = s[index];[m
+ [m
+[31m-        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ[m
+         switch (currChar) {[m
+[31m-        case 'i': // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ[m
+[31m-            pairInt = decodeInt(s.substr(index)); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ[m
+[31m-            index += pairInt.second;             // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ[m
+[31m-            result = pair<Value, int>(pairInt.first, index); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ[m
+[32m+[m[32m        case 'i':[m[41m [m
+[32m+[m[32m            pairInt = decodeInt(s.substr(index));[m
+[32m+[m[32m            index += pairInt.second;[m[41m  [m
+[32m+[m[32m            result = pair<Value, int>(pairInt.first, index);[m
+             return result;[m
+ [m
+[31m-        case 'l': // пїЅпїЅпїЅпїЅпїЅпїЅ[m
+[31m-            pairList = decodeList(s.substr(index)); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ[m
+[31m-            index += pairList.second;             // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ[m
+[31m-            result = pair<Value, int>(pairList.first, index); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ[m
+[32m+[m[32m        case 'l':[m
+[32m+[m[32m            pairList = decodeList(s.substr(index));[m
+[32m+[m[32m            index += pairList.second;[m
+[32m+[m[32m            result = pair<Value, int>(pairList.first, index);[m
+             return result;[m
+ [m
+[31m-        case 'd': // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ[m
+[31m-            pairDict = decodeDict(s.substr(index)); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ[m
+[31m-            index += pairDict.second;             // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ[m
+[31m-            result = pair<Value, int>(pairDict.first, index); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ[m
+[32m+[m[32m        case 'd':[m
+[32m+[m[32m            pairDict = decodeDict(s.substr(index));[m
+[32m+[m[32m            index += pairDict.second;[m
+[32m+[m[32m            result = pair<Value, int>(pairDict.first, index);[m
+             return result;[m
+ [m
+[31m-        default: // пїЅпїЅпїЅпїЅпїЅпїЅ[m
+[31m-            pairString = decodeString(s.substr(index)); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ[m
+[31m-            index += pairString.second;                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ[m
+[31m-            result = pair<Value, int>(pairString.first, index); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ[m
+[32m+[m[32m        default:[m
+[32m+[m[32m            pairstring = decodestring(s.substr(index));[m
+[32m+[m[32m            index += pairstring.second;[m
+[32m+[m[32m            result = pair<Value, int>(pairstring.first, index);[m
+             return result;[m
+         }[m
+     }[m
+ [m
+[31m-    return result; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ)[m
+[32m+[m[32m    return result;[m
+ }[m
+ [m
+[31m-// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ: пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ _decode пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.[m
+ Value Decoder::decode(const string& string) {[m
+[31m-    return _decode(string).first; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ[m
+[32m+[m[32m    return _decode(string).first;[m
+ }[m
+ [m
+[31m-[m
+[31m-std::pair<std::string, int> Str::decodeStr(const std::string& s) { return Decoder::decodeString(s); }[m
+[32m+[m[32mstd::pair<ValueVector, int> Dr::decodeLst(const std::string& s) { return Decoder::decodeList(s); }[m
+[1mdiff --git a/src/bencode/encode.cpp b/src/bencode/encode.cpp[m
+[1mindex 1477dc4..1bfffb3 100644[m
+[1m--- a/src/bencode/encode.cpp[m
+[1m+++ b/src/bencode/encode.cpp[m
+[36m@@ -4,18 +4,20 @@[m
+ #include <sstream>[m
+ [m
+ using namespace bencode;[m
+[32m+[m[32musing std::string;[m
+ [m
+ class EncodeVisitor : public boost::static_visitor<std::string>[m
+ {[m
+ public:[m
+     string operator()(int value) const[m
+     {[m
+[31m-        // TODO[m
+[32m+[m[32m        return "i" + std::to_string(value) + "e";[m
+     }[m
+ [m
+     string operator()(const string& value) const[m
+     {[m
+[31m-        // TODO[m
+[32m+[m[32m        if (value.empty()) throw std::invalid_argument("The line is empty");[m
+[32m+[m[32m        return std::to_string(value.length()) + ":" + value;[m
+     }[m
+ [m
+     string operator()(const ValueDictionary& dict) const[m
+[36m@@ -47,4 +49,4 @@[m [mpublic:[m
+ string Encoder::encode(const Value& value)[m
+ {[m
+     return boost::apply_visitor(EncodeVisitor(), value);[m
+[31m-}[m
+\ No newline at end of file[m
+[32m+[m[32m}[m
+[1mdiff --git a/src/bencode/prettyPrinter.cpp b/src/bencode/prettyPrinter.cpp[m
+[1mindex 9f9f704..ab0af9a 100644[m
+[1m--- a/src/bencode/prettyPrinter.cpp[m
+[1m+++ b/src/bencode/prettyPrinter.cpp[m
+[36m@@ -46,8 +46,8 @@[m [mvoid PrettyPrinter::operator()(const std::string& t) const[m
+     if (!isAscii(t))[m
+         std::cout << "BINARY DATA (length: " << t.size() << ")" << std::endl;[m
+     else {[m
+[31m-        const int MAX_STRING_LENGTH = 100;[m
+[31m-        std::cout << t.substr(0, MAX_STRING_LENGTH) << std::endl;[m
+[32m+[m[32m        const int MAX_string_LENGTH = 100;[m
+[32m+[m[32m        std::cout << t.substr(0, MAX_string_LENGTH) << std::endl;[m
+     }[m
+ }[m
+ [m
+[1mdiff --git a/src/hashing/createHash.cpp b/src/hashing/createHash.cpp[m
+[1mnew file mode 100644[m
+[1mindex 0000000..c088a74[m
+[1m--- /dev/null[m
+[1m+++ b/src/hashing/createHash.cpp[m
+[36m@@ -0,0 +1,61 @@[m
+[32m+[m[32m#include "createHash.h"[m
+[32m+[m[32m#include <iostream>[m
+[32m+[m[32m#include <boost/filesystem.hpp>[m
+[32m+[m[32m#include <boost/algorithm/hex.hpp>[m
+[32m+[m
+[32m+[m[32munsigned long long Hash::choosePieceLength(unsigned long long fileSize)[m
+[32m+[m[32m{[m
+[32m+[m[32m    if (fileSize < 512LL * 1024 * 1024) {[m
+[32m+[m[32m        return 16 * 1024;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    else if (fileSize < 1024LL * 1024 * 1024) {[m[41m [m
+[32m+[m[32m        return 1024 * 1024;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    else if (fileSize < 2ULL * 1024 * 1024 * 1024) {[m
+[32m+[m[32m        return 4LL * 1024 * 1024;[m[41m [m
+[32m+[m[32m    }[m
+[32m+[m[32m    else if (fileSize < 10LL * 1024 * 1024 * 1024) {[m[41m [m
+[32m+[m[32m        return 8LL * 1024 * 1024;[m[41m [m
+[32m+[m[32m    }[m
+[32m+[m[32m    else if (fileSize < 50LL * 1024 * 1024 * 1024) {[m[41m [m
+[32m+[m[32m        return 16LL * 1024 * 1024;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    else {[m[41m [m
+[32m+[m[32m        return 32LL * 1024 * 1024;[m
+[32m+[m[32m    }[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mstd::string Hash::createHash(const std::vector<std::string>& filePaths, size_t chunk_size) {[m
+[32m+[m[32m    std::string pieces;[m
+[32m+[m[32m    std::vector<char> buffer(chunk_size);[m
+[32m+[m[32m    size_t bufferRead = 0;[m
+[32m+[m
+[32m+[m[32m    for (const auto& filePath : filePaths) {[m
+[32m+[m[32m        std::ifstream file(filePath, std::ios::binary);[m
+[32m+[m
+[32m+[m[32m        if (!file)[m
+[32m+[m[32m            throw std::runtime_error("Не удалось открыть файл: " + filePath);[m
+[32m+[m
+[32m+[m
+[32m+[m[32m        while (file) {[m
+[32m+[m[32m            file.read(buffer.data() + bufferRead, chunk_size - bufferRead);[m
+[32m+[m
+[32m+[m[32m            size_t bytesRead = file.gcount();[m
+[32m+[m
+[32m+[m[32m            bufferRead += bytesRead;[m
+[32m+[m
+[32m+[m[32m            if (bufferRead == chunk_size || (file.eof() && filePath == filePaths.back())) {[m
+[32m+[m[32m                boost::uuids::detail::sha1 sha;[m
+[32m+[m[32m                sha.process_bytes(buffer.data(), bytesRead);[m[41m [m
+[32m+[m
+[32m+[m[32m                boost::uuids::detail::sha1::digest_type digest;[m
+[32m+[m[32m                sha.get_digest(digest);[m[41m  [m
+[32m+[m
+[32m+[m[32m                pieces.append(reinterpret_cast<char*>(digest), 20);[m
+[32m+[m[32m                bufferRead = 0;[m
+[32m+[m[32m            }[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    return pieces;[m
+[32m+[m[32m}[m
+\ No newline at end of file[m
+[1mdiff --git a/src/main.cpp b/src/main.cpp[m
+[1mindex 1078795..5ccf660 100644[m
+[1m--- a/src/main.cpp[m
+[1m+++ b/src/main.cpp[m
+[36m@@ -1,22 +1,38 @@[m
+[31m-#include "ufo_torrent.h"[m
+[31m-[m
+[31m-#include <iostream>[m
+[31m-#include <ncurses.h>[m
+[31m-#include <string.h>[m
+[31m-[m
+[31m-#include "../includes/prettyPrinter.h"[m
+[31m-#include "../includes/decode.h"[m
+[31m-#include "../includes/encode.h"[m
+[31m-[m
+[31m-using namespace bencode;[m
+[31m-[m
+[31m-int main()[m
+[31m-{[m
+[31m-[m
+[31m-    string file = "d8:announce42:udp://tracker.opentrackr.org:1337/announce13:announce-listll42:udp://tracker.opentrackr.org:1337/announceel35:udp://open.tracker.cl:1337/announceel33:udp://open.stealth.si:80/announceel41:udp://tracker.torrent.eu.org:451/announceel32:udp://explodie.org:6969/announceee10:created by31:в…в…в… megaseed.kz в…в…в…13:creation datei1729683364e4:infod5:filesld6:lengthi1470559189e4:pathl8:data.bineed6:lengthi2485956e4:pathl9:data0.bineed6:lengthi63294816e4:pathl9:Setup.exeeee4:name18:Factorio by Igruha12:piece lengthi2097152e6:pieces14660:©Ђ+ю‰шмч№Ь€ўa‡R цгАQйЁ†9•~ESсжн© №•ічЏ¤oзѕ]бjСћчtB%ЃКЙЗµ…~йу ^чИн¶­њ`rµ­›v~ю";[m
+[31m-[m
+[31m-    Value torrent = Decoder::decode(file);[m
+[31m-    boost::apply_visitor(PrettyPrinter(), torrent);[m
+[31m-[m
+[31m-//    std::cout << Encoder::encode(10);[m
+[32m+[m[32mп»ї#include "ufo_torrent.h"[m
+[32m+[m
+[32m+[m[32m#include <iostream>[m
+[32m+[m[32m#include <ncurses.h>[m
+[32m+[m[32m#include <string>[m
+[32m+[m
+[32m+[m[32m#include "../includes/prettyPrinter.h"[m
+[32m+[m[32m#include "../includes/decode.h"[m
+[32m+[m[32m#include "../includes/torrentFile.h"[m
+[32m+[m[32m#include "../includes/encode.h"[m
+[32m+[m[32m#include "../includes/fileUtils.h"[m
+[32m+[m[32m#include "../includes/createHash.h"[m
+[32m+[m[32m#include <boost/locale.hpp>[m
+[32m+[m
+[32m+[m[32musing namespace bencode;[m
+[32m+[m[32musing namespace Torrent;[m
+[32m+[m[32musing namespace File;[m
+[32m+[m[32musing namespace Hash;[m
+[32m+[m
+[32m+[m
+[32m+[m[32mint main()[m
+[32m+[m[32m{[m
+[32m+[m[32m    TorrentFile torrent = createTorrentFile([m
+[32m+[m[32m        "exemple",[m
+[32m+[m[32m        {[m
+[32m+[m[32m            { "exemple" },[m
+[32m+[m[32m            { "aaaaaaa" }[m
+[32m+[m[32m        },[m
+[32m+[m[32m        "MyProject",[m
+[32m+[m[32m        "test",[m
+[32m+[m[32m        "John Doe",[m
+[32m+[m[32m        std::time(nullptr)[m
+[32m+[m[32m    );[m
+[32m+[m
+[32m+[m[32m    std::string data = Encoder::encode(toValue(torrent));[m
+[32m+[m
+[32m+[m[32m    // createFile("aa.torrent", data);[m
+ }[m
+\ No newline at end of file[m
+[1mdiff --git a/src/models/torrentFile.cpp b/src/models/torrentFile.cpp[m
+[1mnew file mode 100644[m
+[1mindex 0000000..2405477[m
+[1m--- /dev/null[m
+[1m+++ b/src/models/torrentFile.cpp[m
+[36m@@ -0,0 +1,216 @@[m
+[32m+[m[32m#include "../includes/torrentFile.h"[m
+[32m+[m[32m#include "torrentFile.h"[m
+[32m+[m[32m#include <filesystem>[m
+[32m+[m
+[32m+[m[32musing std::string;[m
+[32m+[m[32musing std::vector;[m
+[32m+[m[32musing std::optional;[m
+[32m+[m
+[32m+[m[32mnamespace fs = std::filesystem;[m
+[32m+[m
+[32m+[m[32musing namespace bencode;[m
+[32m+[m[32musing namespace Torrent;[m
+[32m+[m
+[32m+[m[32mvoid ValueToField::operator()(int value) const {[m
+[32m+[m	[32mif (currentKey == "creation date") {[m
+[32m+[m		[32mtorrent.creationDate = value;[m
+[32m+[m	[32m}[m
+[32m+[m	[32melse if (currentKey == "piece length") {[m
+[32m+[m		[32minfo.pieceLength = value;[m
+[32m+[m	[32m}[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mvoid ValueToField::operator()(const string& value) const {[m
+[32m+[m	[32mif (currentKey == "announce") {[m
+[32m+[m		[32mtorrent.announce = value;[m
+[32m+[m	[32m}[m
+[32m+[m	[32melse if (currentKey == "created by") {[m
+[32m+[m		[32mtorrent.createdBy = value;[m
+[32m+[m	[32m}[m
+[32m+[m	[32melse if (currentKey == "name") {[m
+[32m+[m		[32minfo.name = value;[m
+[32m+[m	[32m}[m
+[32m+[m	[32melse if (currentKey == "pieces") {[m
+[32m+[m		[32minfo.pieces = value;[m
+[32m+[m	[32m}[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mvoid ValueToField::operator()(const ValueVector& values) const {[m
+[32m+[m	[32mif (currentKey == "announce-list") {[m
+[32m+[m		[32mvector<string> trackers;[m
+[32m+[m		[32mfor (const auto& v : values) {[m
+[32m+[m			[32mif (v.type() == typeid(ValueVector)) {[m
+[32m+[m				[32mvector<string> group;[m
+[32m+[m				[32mfor (const auto& nested : boost::get<ValueVector>(v)) {[m
+[32m+[m					[32mgroup.push_back(boost::get<string>(nested));[m
+[32m+[m				[32m}[m
+[32m+[m				[32mtorrent.announceList.push_back(group);[m
+[32m+[m			[32m}[m
+[32m+[m		[32m}[m
+[32m+[m	[32m}[m
+[32m+[m	[32melse if (currentKey == "files") {[m
+[32m+[m		[32mfor (const auto& v : values) {[m
+[32m+[m			[32mif (v.type() == typeid(ValueDictionary)) {[m
+[32m+[m				[32mconst ValueDictionary& fileDict = boost::get<ValueDictionary>(v);[m
+[32m+[m				[32mTorrentFileInfo file;[m
+[32m+[m
+[32m+[m				[32mfor (const auto& [key, fileValue] : fileDict) {[m
+[32m+[m					[32mcurrentKey = key;[m
+[32m+[m
+[32m+[m					[32mif (key == "length") {[m
+[32m+[m						[32mif (fileValue.type() == typeid(int))[m
+[32m+[m							[32mfile.length = boost::get<int>(fileValue);[m
+[32m+[m					[32m}[m
+[32m+[m					[32melse if (key == "path") {[m
+[32m+[m						[32mif (fileValue.type() == typeid(ValueVector))[m
+[32m+[m							[32mfor (const auto& pathValue : boost::get<ValueVector>(fileValue))[m
+[32m+[m								[32mif (pathValue.type() == typeid(string))[m
+[32m+[m									[32mfile.path.push_back(boost::get<string>(pathValue));[m
+[32m+[m					[32m}[m
+[32m+[m
+[32m+[m					[32mcurrentKey.clear();[m
+[32m+[m				[32m}[m
+[32m+[m
+[32m+[m				[32minfo.files.push_back(file);[m
+[32m+[m			[32m}[m
+[32m+[m		[32m}[m
+[32m+[m	[32m}[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mvoid ValueToField::operator()(const ValueDictionary& dict) const {[m
+[32m+[m	[32mif (currentKey == "info") {[m
+[32m+[m		[32mfor (const auto& [key, value] : dict) {[m
+[32m+[m			[32mcurrentKey = key;[m
+[32m+[m			[32mboost::apply_visitor(*this, value);[m
+[32m+[m			[32mcurrentKey.clear();[m
+[32m+[m		[32m}[m
+[32m+[m	[32m}[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mTorrentFile Torrent::parseTorrentFile(const Value& data) {[m
+[32m+[m	[32mif (data.type() != typeid(ValueDictionary))[m
+[32m+[m		[32mthrow std::invalid_argument("Wrong torrent file format");[m
+[32m+[m
+[32m+[m	[32mValueDictionary dict = boost::get<ValueDictionary>(data);[m
+[32m+[m	[32mTorrentFile torrent;[m
+[32m+[m	[32mValueToField visitor(torrent);[m
+[32m+[m
+[32m+[m	[32mfor (const auto& [key, value] : dict) {[m
+[32m+[m		[32mvisitor.currentKey = key;[m
+[32m+[m		[32mboost::apply_visitor(visitor, value);[m
+[32m+[m		[32mvisitor.currentKey.clear();[m
+[32m+[m	[32m}[m
+[32m+[m
+[32m+[m	[32mreturn torrent;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mValue Torrent::toValue(const TorrentFile& torrent) {[m
+[32m+[m	[32mValueDictionary result;[m
+[32m+[m
+[32m+[m	[32mValueDictionary infoDict;[m
+[32m+[m	[32minfoDict["name"] = torrent.info.name;[m
+[32m+[m
+[32m+[m	[32mif (!torrent.info.files.empty()) {[m
+[32m+[m		[32mValueVector filesVector;[m
+[32m+[m		[32mfor (const auto& file : torrent.info.files) {[m
+[32m+[m			[32mValueDictionary fileDict;[m
+[32m+[m			[32mfileDict["length"] = static_cast<int>(file.length);[m
+[32m+[m
+[32m+[m			[32mValueVector pathVector;[m
+[32m+[m			[32mfor (const auto& pathPart : file.path)[m[41m [m
+[32m+[m				[32mpathVector.push_back(pathPart);[m
+[32m+[m[41m			[m
+[32m+[m			[32mfileDict["path"] = pathVector;[m
+[32m+[m
+[32m+[m			[32mfilesVector.push_back(fileDict);[m
+[32m+[m		[32m}[m
+[32m+[m		[32minfoDict["files"] = filesVector;[m
+[32m+[m	[32m}[m
+[32m+[m
+[32m+[m	[32minfoDict["piece length"] = static_cast<int>(torrent.info.pieceLength);[m
+[32m+[m	[32minfoDict["pieces"] = torrent.info.pieces;[m
+[32m+[m	[32mresult["info"] = infoDict;[m
+[32m+[m
+[32m+[m	[32mValueVector announceList;[m
+[32m+[m	[32mfor (const auto& tier : torrent.announceList) {[m
+[32m+[m		[32mValueVector tierVector;[m
+[32m+[m		[32mfor (const auto& tracker : tier) {[m
+[32m+[m			[32mtierVector.push_back(tracker);[m
+[32m+[m		[32m}[m
+[32m+[m		[32mannounceList.push_back(tierVector);[m
+[32m+[m	[32m}[m
+[32m+[m	[32mresult["announce-list"] = announceList;[m
+[32m+[m
+[32m+[m	[32mif (torrent.createdBy)[m[41m [m
+[32m+[m		[32mresult["created by"] = *torrent.createdBy;[m
+[32m+[m
+[32m+[m
+[32m+[m	[32mif (torrent.creationDate)[m[41m [m
+[32m+[m		[32mresult["creation date"] = static_cast<int>(*torrent.creationDate);[m
+[32m+[m
+[32m+[m
+[32m+[m	[32mresult["announce"] = torrent.announce;[m
+[32m+[m
+[32m+[m	[32mreturn result;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mTorrentFile Torrent::createTorrentFile(const string& announce, const vector<vector<string>>& announceList, const string& name, const string& folderPath, optional<string> createdBy, optional<time_t> creationDate)[m
+[32m+[m[32m{[m
+[32m+[m	[32mTorrentFile torrent;[m
+[32m+[m
+[32m+[m	[32mtorrent.announce = announce;[m
+[32m+[m	[32mtorrent.announceList = announceList;[m
+[32m+[m	[32mtorrent.createdBy = createdBy;[m
+[32m+[m	[32mtorrent.creationDate = creationDate;[m
+[32m+[m	[32mtorrent.info.name = name;[m
+[32m+[m
+[32m+[m	[32mif (!fs::exists(folderPath))[m
+[32m+[m		[32mthrow std::runtime_error("Invalid path: " + folderPath);[m
+[32m+[m
+[32m+[m	[32munsigned long long filesSize = 0;[m
+[32m+[m
+[32m+[m	[32mvector<string> fullPaths;[m
+[32m+[m	[32mvector<TorrentFileInfo> infoFiles;[m
+[32m+[m
+[32m+[m	[32mif (fs::is_regular_file(folderPath)) {[m
+[32m+[m		[32mTorrentFileInfo cur;[m
+[32m+[m		[32mfs::path filePath = folderPath;[m
+[32m+[m		[32mcur.length = fs::file_size(filePath);[m
+[32m+[m
+[32m+[m		[32mcur.path.push_back(filePath.filename().string());[m
+[32m+[m
+[32m+[m		[32minfoFiles.push_back(cur);[m
+[32m+[m		[32mfullPaths.push_back(filePath.string());[m
+[32m+[m		[32mfilesSize = cur.length;[m
+[32m+[m	[32m}[m
+[32m+[m	[32melse if (fs::is_directory(folderPath)) {[m
+[32m+[m		[32mfor (const auto& entry : fs::recursive_directory_iterator(folderPath)) {[m
+[32m+[m			[32mif (entry.is_regular_file()) {[m
+[32m+[m				[32mTorrentFileInfo cur;[m
+[32m+[m
+[32m+[m				[32mfs::path filePath = entry.path();[m
+[32m+[m				[32mcur.length = fs::file_size(filePath);[m
+[32m+[m
+[32m+[m				[32mfs::path relativePath = fs::relative(filePath, folderPath);[m
+[32m+[m				[32mfor (const auto& part : relativePath) {[m
+[32m+[m					[32mcur.path.push_back(part.string());[m
+[32m+[m				[32m}[m
+[32m+[m
+[32m+[m				[32minfoFiles.push_back(cur);[m
+[32m+[m				[32mfullPaths.push_back(filePath.string());[m
+[32m+[m				[32mfilesSize += cur.length;[m
+[32m+[m			[32m}[m
+[32m+[m		[32m}[m
+[32m+[m
+[32m+[m		[32mif (infoFiles.empty())[m[41m [m
+[32m+[m			[32mthrow std::runtime_error("The folder is empty: " + folderPath);[m
+[32m+[m	[32m}[m
+[32m+[m	[32melse[m
+[32m+[m		[32mthrow std::runtime_error("The path is neither a file nor a directory: " + folderPath);[m
+[32m+[m
+[32m+[m	[32mtorrent.info.pieceLength = Hash::choosePieceLength(filesSize);[m
+[32m+[m	[32mtorrent.info.pieces = Hash::createHash(fullPaths, torrent.info.pieceLength);[m
+[32m+[m	[32mtorrent.info.files = infoFiles;[m
+[32m+[m
+[32m+[m	[32mreturn torrent;[m
+[32m+[m[32m}[m
+\ No newline at end of file[m
+[1mdiff --git a/src/utils/fileUtils.cpp b/src/utils/fileUtils.cpp[m
+[1mnew file mode 100644[m
+[1mindex 0000000..8ce6358[m
+[1m--- /dev/null[m
+[1m+++ b/src/utils/fileUtils.cpp[m
+[36m@@ -0,0 +1,18 @@[m
+[32m+[m[32m#include "fileUtils.h"[m
+[32m+[m
+[32m+[m[32mstring File::read(const std::string& filePath) {[m
+[32m+[m	[32m// TODO[m
+[32m+[m	[32mreturn "";[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32munsigned long long File::getFileSize(const std::string& filePath) {[m
+[32m+[m	[32mstd::ifstream file(filePath, std::ios::binary | std::ios::ate);[m
+[32m+[m	[32mif (!file.is_open())[m
+[32m+[m		[32mthrow std::runtime_error("Не удалось открыть файл: " + filePath);[m
+[32m+[m
+[32m+[m	[32mreturn file.tellg();[m[41m [m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mvoid File::createFile(const std::string& filePath, const std::string& binaryContent) {[m
+[32m+[m[32m    // TODO[m
+[32m+[m[32m}[m
+[1mdiff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt[m
+[1mindex 6a6bc97..84028c2 100644[m
+[1m--- a/tests/CMakeLists.txt[m
+[1m+++ b/tests/CMakeLists.txt[m
+[36m@@ -8,13 +8,22 @@[m
+ find_package(GTest REQUIRED)[m
+ include_directories(${GTEST_INCLUDE_DIRS})[m
+ [m
+[32m+[m[32mfind_package(Curses REQUIRED)[m
+[32m+[m[32minclude_directories(${CURSES_INDLUDE_DIRS})[m
+[32m+[m
+[32m+[m[32mfind_package(Boost REQUIRED)[m
+[32m+[m[32minclude_directories(${Boost_INCLUDE_DIRS})[m[41m [m
+[32m+[m
+ #For Windows: Prevent overriding the parent project's compiler/linker settings[m
+ # set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)[m
+ # FetchContent_MakeAvailable(googletest)[m
+ [m
+ # Now simply link against gtest or gtest_main as needed. Eg[m
+[31m-add_executable(ufo_tests test.cpp)[m
+[31m-target_link_libraries(ufo_tests Testing GTest::gtest_main)[m
+[32m+[m[32madd_executable(ufo_tests ../src/bencode/decode.cpp test.cpp)[m
+[32m+[m[32mtarget_link_libraries(ufo_tests Testing GTest::gtest_main[m
+[32m+[m[32m${CURSES_LIBRARIES}[m[41m [m
+[32m+[m[32m${Boost_LIBRARIES}[m[41m [m
+[32m+[m[32m)[m
+ include(GoogleTest)[m
+ gtest_discover_tests(ufo_tests)[m
+ add_test(NAME ufo_tests_lib COMMAND tests)[m
+\ No newline at end of file[m
+[1mdiff --git a/tests/test.cpp b/tests/test.cpp[m
+[1mindex 9274b11..0211456 100644[m
+[1m--- a/tests/test.cpp[m
+[1m+++ b/tests/test.cpp[m
+[36m@@ -1,74 +1,44 @@[m
+ #include "ufo_torrent.h"[m
+ #include "decode.h"[m
+[32m+[m[32m#include "encode.h"[m
+ #include <gtest/gtest.h>[m
+ using namespace bencode;[m
+ [m
+ [m
+[32m+[m[32musing std::string;[m
+[32m+[m[32musing std::pair;[m
+[32m+[m[32musing std::string;[m
+ [m
+[31m-class Dec_test : public testing::Test[m
+[32m+[m[32mclass Dr_list_test : public testing::Test[m
+ {[m
+ protected:[m
+[31m-    Str d1{};[m
+[31m-    Str d2{};[m
+[32m+[m[32m    Dr s{};[m
+ };[m
+ [m
+ [m
+[31m-TEST_F(Dec_test, general_test)[m
+[31m-{[m
+[31m-    std::pair<std::string, int> res  { "ubun", 4 };[m
+[31m-    ASSERT_EQ(d1.decodeStr("4:ubuntu").first, res.first);[m
+[31m-}[m
+[31m-[m
+[31m-TEST_F(Dec_test, general_test_2)[m
+[31m-{[m
+[31m-    ASSERT_DEATH(d1.decodeStr("i1414196789697899969898989898889:something"), "Выход за диапозон");[m
+[31m-}[m
+[31m-[m
+[31m-TEST_F(Dec_test, general_test_3)[m
+[31m-{[m
+[31m-    ASSERT_DEATH(d1.decodeStr("i0:someth"), "Неверный формат");[m
+[31m-}[m
+ [m
+[31m-TEST_F(Dec_test, general_test_4)[m
+[32m+[m[32mTEST_F(Dr_list_test, first_test)[m
+ {[m
+[31m-    std::pair<std::string, int>res{"abcd", 6};[m
+[31m-    ASSERT_EQ(d1.decodeStr("4:abcd"), res);[m
+[32m+[m[32m    std::string input = "li1ei2ee";[m[41m [m
+[32m+[m[32m    EXPECT_EQ(Encoder::encode(s.decodeLst(input).first), "li1ei2ee");[m
+ }[m
+ [m
+[31m-TEST_F(Dec_test, general_test_5)[m
+[32m+[m[32mTEST_F(Dr_list_test, second_test)[m
+ {[m
+[31m-    ASSERT_DEATH(d1.decodeStr("i4:qwerty123:key5"), "Неверный формат");[m
+[32m+[m[32m    ASSERT_DEATH(s.decodeLst(""), "Invalid format");[m
+ }[m
+ [m
+[31m-TEST_F(Dec_test, general_test_6)[m
+[32m+[m[32mTEST_F(Dr_list_test, third_test)[m
+ {[m
+[31m-    ASSERT_DEATH(d1.decodeStr("i:abcd"), "Неверный формат ввода");[m
+[32m+[m[32m    ASSERT_DEATH(s.decodeLst("i161231183942184912"), "Invalid format");[m
+ }[m
+ [m
+[31m-TEST_F(Dec_test, general_test_7)[m
+[31m-{[m
+[31m-    std::pair<std::string, int>res{ "QWET", 6 };[m
+[31m-    ASSERT_EQ(d1.decodeStr("4:QWETRT&@"), res);[m
+[31m-}[m
+[31m-[m
+[31m-TEST_F(Dec_test, general_test_8)[m
+[31m-{[m
+[31m-    ASSERT_DEATH(d1.decodeStr("4:").first, "Неверный формат");[m
+[31m-}[m
+[31m-[m
+[31m-TEST_F(Dec_test, general_test_9)[m
+[31m-{[m
+[31m-    std::pair<std::string, int>res{ "some", 6 };[m
+[31m-    std::pair<std::string, int>res2{ "some", 6 };[m
+[31m-    ASSERT_EQ(d1.decodeStr("4:something"), res);[m
+[31m-    ASSERT_EQ(d2.decodeStr("4:some").first, res2.first);[m
+[31m-}[m
+[31m-TEST_F(Dec_test, general_test_10)[m
+[32m+[m[32mTEST_F(Dr_list_test, fourth_test)[m
+ {[m
+[31m-    ASSERT_DEATH(d2.decodeStr("4:som"), "Неправильный ввод");[m
+[32m+[m[32m    EXPECT_EQ(Encoder::encode(s.decodeLst("lli1ei2eee2").first), "lli1ei2eee");[m
+ }[m
+ [m
+[31m-TEST_F(Dec_test, general_test_11)[m
+[32m+[m[32mTEST_F(Dr_list_test, fifth_test)[m
+ {[m
+[31m-    ASSERT_DEATH(d1.decodeStr(":abcd"), "Отсутствует число");[m
+[32m+[m[32m    ASSERT_DEATH(s.decodeLst("le"), "Invalid format");[m
+ }[m
+\ No newline at end of file[m

@@ -14,8 +14,6 @@ namespace bencode
 	public:
 
 		friend struct Dr;
-
-		friend struct Str;
 		// Декодирование строки
 		static Value decode(const std::string& string);
 
@@ -41,12 +39,6 @@ namespace bencode
 	struct Dr
 	{
 		std::pair<ValueVector, int> decodeLst(const std::string& s);
-		Decoder decoder;
-	};
-
-
-	struct Str {
-		std::pair<std::string, int> decodeStr(const std::string& s);
 		Decoder decoder;
 	};
 

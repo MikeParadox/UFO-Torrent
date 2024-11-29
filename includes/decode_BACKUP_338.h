@@ -3,6 +3,7 @@
 
 #include "valueTypes.h"
 
+<<<<<<< HEAD
 
 
 namespace bencode 
@@ -14,8 +15,13 @@ namespace bencode
 	public:
 
 		friend struct Dr;
+=======
+namespace bencode {
 
-		friend struct Str;
+	class Decoder
+	{
+	public:
+>>>>>>> parent of f88e419 (Tests, implementation of decoding the first element in a string of type string)
 		// Декодирование строки
 		static Value decode(const std::string& string);
 
@@ -38,6 +44,7 @@ namespace bencode
 		// Декодирования всей строки рекурсией
 		static std::pair<Value, int> _decode(const std::string& s);
 	};
+<<<<<<< HEAD
 	struct Dr
 	{
 		std::pair<ValueVector, int> decodeLst(const std::string& s);
@@ -45,12 +52,8 @@ namespace bencode
 	};
 
 
-	struct Str {
-		std::pair<std::string, int> decodeStr(const std::string& s);
-		Decoder decoder;
-	};
-
-
+=======
+>>>>>>> parent of f88e419 (Tests, implementation of decoding the first element in a string of type string)
 }
 
 #endif

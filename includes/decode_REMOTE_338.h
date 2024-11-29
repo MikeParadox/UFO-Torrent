@@ -3,19 +3,11 @@
 
 #include "valueTypes.h"
 
-
-
-namespace bencode 
-{
+namespace bencode {
 
 	class Decoder
 	{
-
 	public:
-
-		friend struct Dr;
-
-		friend struct Str;
 		// Декодирование строки
 		static Value decode(const std::string& string);
 
@@ -24,10 +16,10 @@ namespace bencode
 		static std::string firstDigit(const std::string& str);
 
 		// Декодирования первого инта в строке
-		static std::pair<unsigned long long, int> decodeInt(const std::string& s);
+		static std::pair<long long, int> decodeInt(const std::string& s);
 
 		// Декодирование первого стринга в строке
-		static std::pair<std::string, int> decodestring(const std::string& s);
+		static std::pair<std::string, int> decodeString(const std::string& s);
 
 		// Декодирования листа
 		static std::pair<ValueVector, int> decodeList(const std::string& s);
@@ -38,19 +30,6 @@ namespace bencode
 		// Декодирования всей строки рекурсией
 		static std::pair<Value, int> _decode(const std::string& s);
 	};
-	struct Dr
-	{
-		std::pair<ValueVector, int> decodeLst(const std::string& s);
-		Decoder decoder;
-	};
-
-
-	struct Str {
-		std::pair<std::string, int> decodeStr(const std::string& s);
-		Decoder decoder;
-	};
-
-
 }
 
 #endif

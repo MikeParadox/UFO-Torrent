@@ -34,7 +34,7 @@ string Decoder::firstDigit(const string& str) {
 
 pair<unsigned long long, int> Decoder::decodeInt(const string& s) {
     size_t eIndex = s.find_first_of('e');
-    
+
     unsigned long long value;
     if (stringToLongLong(s.substr(1, eIndex - 1), value))
         return pair<unsigned long long, int>(value, eIndex + 1);
@@ -43,7 +43,7 @@ pair<unsigned long long, int> Decoder::decodeInt(const string& s) {
 }
 
 pair<string, int> Decoder::decodestring(const string& s) {
-    if (!isdigit(s[0])) 
+    if (!isdigit(s[0]))
         throw std::invalid_argument("Wrong file struct");
 
     string lengthPart = firstDigit(s);
@@ -61,8 +61,8 @@ pair<string, int> Decoder::decodestring(const string& s) {
 }
 
 pair<ValueVector, int> Decoder::decodeList(const string& s) {
-    ValueVector xs; 
-    int index = 1; 
+    ValueVector xs;
+    int index = 1;
 
     while (index < s.length()) {
         char currentChar = s[index];
@@ -76,20 +76,20 @@ pair<ValueVector, int> Decoder::decodeList(const string& s) {
 
         std::tie(b, i) = (_decode(s.substr(index)));
 
-        xs.push_back(b); 
-        index += i;    
+        xs.push_back(b);
+        index += i;
     }
 
     return pair<ValueVector, int>(xs, index);
 }
 
 pair<ValueDictionary, int> Decoder::decodeDict(const string& s) {
-    ValueDictionary dict; 
-    int index = 1; 
+    ValueDictionary dict;
+    int index = 1;
 
     while (index < s.length()) {
         char currentChar = s[index];
-        if (currentChar == 'e') { 
+        if (currentChar == 'e') {
             index += 1;
             break;
         }
@@ -107,7 +107,7 @@ pair<ValueDictionary, int> Decoder::decodeDict(const string& s) {
         index += i1 + i2;
     }
 
-    return pair<ValueDictionary, int>(dict, index); 
+    return pair<ValueDictionary, int>(dict, index);
 }
 
 pair<Value, int> Decoder::_decode(const string& s) {
@@ -123,9 +123,9 @@ pair<Value, int> Decoder::_decode(const string& s) {
         char currChar = s[index];
 
         switch (currChar) {
-        case 'i': 
+        case 'i':
             pairInt = decodeInt(s.substr(index));
-            index += pairInt.second;  
+            index += pairInt.second;
             result = pair<Value, int>(pairInt.first, index);
             return result;
 
@@ -156,4 +156,8 @@ Value Decoder::decode(const string& string) {
     return _decode(string).first;
 }
 
+std::pair<std::string, int> Str::decodeStr(const std::string& s) { return Decoder::decodestring(s); }
+
 std::pair<ValueVector, int> Dr::decodeLst(const std::string& s) { return Decoder::decodeList(s); }
+
+
