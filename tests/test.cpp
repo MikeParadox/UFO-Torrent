@@ -22,7 +22,7 @@ protected:
     Str d2{};
 };
 
-//Тесты лист
+//TEST LIST
 TEST_F(Dr_list_test, first_test)
 {
     std::string input = "li1ei2ee"; 
@@ -49,7 +49,7 @@ TEST_F(Dr_list_test, fifth_test)
     ASSERT_DEATH(s.decodeLst("le"), "Invalid format");
 }
 
-/// Тесты строк
+//TEST STRING
 TEST_F(Dec_test, general_test)
 {
     std::pair<std::string, int> res{ "ubun", 4 };
@@ -58,12 +58,12 @@ TEST_F(Dec_test, general_test)
 
 TEST_F(Dec_test, general_test_2)
 {
-    ASSERT_DEATH(d1.decodeStr("i1414196789697899969898989898889:something"), "Выход за диапозон");
+    ASSERT_DEATH(d1.decodeStr("i1414196789697899969898989898889:something"), "Г‚Г»ГµГ®Г¤ Г§Г  Г¤ГЁГ ГЇГ®Г§Г®Г­");
 }
 
 TEST_F(Dec_test, general_test_3)
 {
-    ASSERT_DEATH(d1.decodeStr("i0:someth"), "Неверный формат");
+    ASSERT_DEATH(d1.decodeStr("i0:someth"), "ГЌГҐГўГҐГ°Г­Г»Г© ГґГ®Г°Г¬Г ГІ");
 }
 
 TEST_F(Dec_test, general_test_4)
@@ -74,12 +74,12 @@ TEST_F(Dec_test, general_test_4)
 
 TEST_F(Dec_test, general_test_5)
 {
-    ASSERT_DEATH(d1.decodeStr("i4:qwerty123:key5"), "Неверный формат");
+    ASSERT_DEATH(d1.decodeStr("i4:qwerty123:key5"), "ГЌГҐГўГҐГ°Г­Г»Г© ГґГ®Г°Г¬Г ГІ");
 }
 
 TEST_F(Dec_test, general_test_6)
 {
-    ASSERT_DEATH(d1.decodeStr("i:abcd"), "Неверный формат ввода");
+    ASSERT_DEATH(d1.decodeStr("i:abcd"), "ГЌГҐГўГҐГ°Г­Г»Г© ГґГ®Г°Г¬Г ГІ ГўГўГ®Г¤Г ");
 }
 
 TEST_F(Dec_test, general_test_7)
@@ -90,7 +90,7 @@ TEST_F(Dec_test, general_test_7)
 
 TEST_F(Dec_test, general_test_8)
 {
-    ASSERT_DEATH(d1.decodeStr("4:").first, "Неверный формат");
+    ASSERT_DEATH(d1.decodeStr("4:").first, "ГЌГҐГўГҐГ°Г­Г»Г© ГґГ®Г°Г¬Г ГІ");
 }
 
 TEST_F(Dec_test, general_test_9)
@@ -102,10 +102,10 @@ TEST_F(Dec_test, general_test_9)
 }
 TEST_F(Dec_test, general_test_10)
 {
-    ASSERT_DEATH(d2.decodeStr("4:som"), "Неправильный ввод");
+    ASSERT_DEATH(d2.decodeStr("4:som"), "ГЌГҐГЇГ°Г ГўГЁГ«ГјГ­Г»Г© ГўГўГ®Г¤");
 }
 
 TEST_F(Dec_test, general_test_11)
 {
-    ASSERT_DEATH(d1.decodeStr(":abcd"), "Отсутствует число");
+    ASSERT_DEATH(d1.decodeStr(":abcd"), "ГЋГІГ±ГіГІГ±ГІГўГіГҐГІ Г·ГЁГ±Г«Г®");
 }
