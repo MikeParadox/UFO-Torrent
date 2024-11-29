@@ -9,51 +9,36 @@ using std::string;
 using std::pair;
 using std::string;
 
-class Dc_test : public testing::Test
+class Dr_list_test : public testing::Test
 {
 protected:
-    Dt s{};
+    Dr s{};
 };
 
 
 
-TEST_F(Dc_test, first_test)
+TEST_F(Dr_list_test, first_test)
 {
-    ASSERT_DEATH(s.decodeDc("124444:1231221321"), "Неверный формат");
+    std::string input = "li1ei2ee"; 
+    EXPECT_EQ(Encoder::encode(s.decodeLst(input).first), "li1ei2ee");
 }
 
-
-TEST_F(Dc_test, first_test_2)
+TEST_F(Dr_list_test, second_test)
 {
-    ASSERT_EQ(Encoder::encode(s.decodeDc("d3:dog4:dogs3:agei8ee").first), "d3:agei8e3:dog4:dogse");
+    ASSERT_DEATH(s.decodeLst(""), "Invalid format");
 }
 
-TEST_F(Dc_test, first_test_3)
+TEST_F(Dr_list_test, third_test)
 {
-    ASSERT_DEATH(s.decodeDc(""), "Неправильный ввод");
+    ASSERT_DEATH(s.decodeLst("i161231183942184912"), "Invalid format");
 }
 
-TEST_F(Dc_test, first_test_4)
+TEST_F(Dr_list_test, fourth_test)
 {
-    ASSERT_EQ(s.decodeDc("d3:cat4:spam3:agei42ee").second, 22);
+    EXPECT_EQ(Encoder::encode(s.decodeLst("lli1ei2eee2").first), "lli1ei2eee");
 }
 
-TEST_F(Dc_test, first_test_5)
+TEST_F(Dr_list_test, fifth_test)
 {
-    ASSERT_DEATH(s.decodeDc("d0"), "Неправильный ввод");
-}
-
-TEST_F(Dc_test, first_test_6)
-{
-    ASSERT_DEATH(s.decodeDc("3:kss:dodge3:age67e"), "Неверный ввод");
-}
-
-TEST_F(Dc_test, first_test_7)
-{
-    ASSERT_EQ(Encoder::encode(s.decodeDc("d3:kit6:string3:agei14ee").first), "d3:agei14e3:kit6:stringe");
-}
-
-TEST_F(Dc_test, first_test_8)
-{
-    ASSERT_EQ(Encoder::encode(s.decodeDc("d4:cars5:ldada3:agei192ee").first), "d3:agei192e4:cars5:ldadae");
+    ASSERT_DEATH(s.decodeLst("le"), "Invalid format");
 }

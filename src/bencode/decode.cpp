@@ -156,4 +156,4 @@ Value Decoder::decode(const string& string) {
     return _decode(string).first;
 }
 
-pair<ValueDictionary, int> Dt::decodeDc(const string& s) { return Decoder::decodeDict(s); }
+std::pair<ValueVector, int> Dr::decodeLst(const std::string& s) { return Decoder::decodeList(s); }

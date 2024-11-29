@@ -13,7 +13,7 @@ namespace bencode
 
 	public:
 
-		friend struct Dt;
+		friend struct Dr;
 		// Декодирование строки
 		static Value decode(const std::string& string);
 
@@ -36,9 +36,9 @@ namespace bencode
 		// Декодирования всей строки рекурсией
 		static std::pair<Value, int> _decode(const std::string& s);
 	};
-	struct Dt
+	struct Dr
 	{
-		std::pair<ValueDictionary, int> decodeDc(const std::string& s);
+		std::pair<ValueVector, int> decodeLst(const std::string& s);
 		Decoder decoder;
 	};
 
