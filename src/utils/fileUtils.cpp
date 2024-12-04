@@ -1,6 +1,10 @@
 #include "fileUtils.h"
 
-
+/// <summary>
+/// The method outputs the file size at the specified path to it.
+/// </summary>
+/// <param name="filePath">Path to the desired file.</param>
+/// <returns>The size of the found file in bytes</returns>
 unsigned long long File::getFileSize(const std::string& filePath) {
 	std::ifstream file(filePath, std::ios::binary | std::ios::ate);
 	if (!file.is_open())
@@ -9,6 +13,11 @@ unsigned long long File::getFileSize(const std::string& filePath) {
 	return file.tellg(); 
 }
 
+/// <summary>
+/// The method opens the file at the specified path in binary mode and writes binaryContent to it.
+/// </summary>
+/// <param name="filePath">Path to the desired file.</param>
+/// <param name="binaryContent">Desired content.</param>
 void File::createFile(const std::string& filePath, const std::string& binaryContent) {
 	std::ofstream outFile(filePath, std::ios::binary);
 
@@ -23,6 +32,11 @@ void File::createFile(const std::string& filePath, const std::string& binaryCont
 	outFile.close();
 }
 
+/// <summary>
+/// The method opens a file with the specified path and reads its content as a string.
+/// </summary>
+/// <param name="filePath">Path to the desired file.</param>
+/// <returns>Content given file.</returns>
 string File::read(const std::string& filePath) {
 	std::ifstream inputFile(filePath);
 	if (!inputFile.is_open())
