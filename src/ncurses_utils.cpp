@@ -4,6 +4,12 @@
 #include <string>
 #include <torrentFile.h>
 
+/// <summary>
+/// The function displays the menu in the menu_win window.
+/// </summary>
+/// <param name="menu_win ->">Current window</param>
+/// <param name="menu_items ->">Menu elements</param>
+/// <param name="highlight ->">Selected item in the menu</param>
 void display_menu(WINDOW* menu_win, const std::vector<std::string>& menu_items, size_t highlight)
 {
     box(menu_win, 0, 0);  // Рисуем рамку вокруг окна
@@ -23,6 +29,12 @@ void display_menu(WINDOW* menu_win, const std::vector<std::string>& menu_items, 
     wrefresh(menu_win);
 }
 
+/// <summary>
+/// Function for entering the path to the required file using the ncurses interface.
+/// </summary>
+/// <param name="input_win ->">Window for user input</param>
+/// <param name="message ->">Message for user in the window input_win</param>
+/// <returns>Entered path is in the form of std::string</returns>
 std::string inputFilePath(WINDOW* input_win,std::string message) 
 {
     char input[256] = { 0 };  // Буфер для ввода текста
@@ -61,6 +73,11 @@ std::string inputFilePath(WINDOW* input_win,std::string message)
     return std::string(input);  // Возвращаем введенный путь
 }
 
+/// <summary>
+/// The function accepts a Torrent type object::Torrent File and counts the number of output lines.
+/// </summary>
+/// <param name="file ->">Selected file</param>
+/// <returns>Total number of output lines.</returns>
 int countLinesForOutput(Torrent::TorrentFile file)
 {
     int res = 7;//one for announce, one for "internal structure:", one for "press any button", "file content", +2 for 2 spaces
@@ -77,6 +94,12 @@ int countLinesForOutput(Torrent::TorrentFile file)
     return res;
 }
 
+/// <summary>
+/// Function compares the lengths of strings and returns True if the first one is shorter.
+/// </summary>
+/// <param name="str1 ->">First string.</param>
+/// <param name="str2 ->">Second string.</param>
+/// <returns>Boolean (True/False).</returns>
 bool strSizeComp(const std::string& str1, const std::string& str2)
 {
     return str1.size() < str2.size();

@@ -10,7 +10,12 @@ using namespace bencode;
 using std::string;
 using std::pair;
 
-
+/// <summary>
+/// Function that converts a string and returns a boolean.
+/// </summary>
+/// <param name="str ->">String to convert</param>
+/// <param name="result ->">Boolean (True/False).</param>
+/// <returns>Boolean (True/False)</returns>
 bool stringToLongLong(const std::string& str, unsigned long long& result) {
     try {
         result = boost::lexical_cast<unsigned long long>(str);
@@ -21,6 +26,11 @@ bool stringToLongLong(const std::string& str, unsigned long long& result) {
     }
 }
 
+/// <summary>
+/// Method searches for the first digit in a string and returns it as a string.
+/// </summary>
+/// <param name="str ->">String for searching.</param>
+/// <returns>String with digit.</returns>
 string Decoder::firstDigit(const string& str) {
     string number;
     for (int i = 0; i < str.size(); ++i) {
@@ -32,6 +42,11 @@ string Decoder::firstDigit(const string& str) {
     return number;
 }
 
+/// <summary>
+/// Method decodes an integer from the string s.
+/// </summary>
+/// <param name="s">String with a number</param>
+/// <returns>Number and index of the character after 'e'.</returns>
 pair<unsigned long long, int> Decoder::decodeInt(const string& s) {
     size_t eIndex = s.find_first_of('e');
     
@@ -42,6 +57,11 @@ pair<unsigned long long, int> Decoder::decodeInt(const string& s) {
         throw std::invalid_argument("Wrong int in file");
 }
 
+/// <summary>
+/// Function accepts a string in Bencode format and returns the decoded string and the index for the next decoding.
+/// </summary>
+/// <param name="s ->">String for decoding.</param>
+/// <returns>Decoded string and index for next decoding.</returns>
 pair<string, int> Decoder::decodestring(const string& s) {
     if (!isdigit(s[0])) 
         throw std::invalid_argument("Wrong file struct");
@@ -60,6 +80,11 @@ pair<string, int> Decoder::decodestring(const string& s) {
     );
 }
 
+/// <summary>
+/// Function accepts a string in Bencode format and returns the decoded list and the index for the next decoding.
+/// </summary>
+/// <param name="s ->">String for decoding.</param>
+/// <returns>Decoded list and index for next decoding.</returns>
 pair<ValueVector, int> Decoder::decodeList(const string& s) {
     ValueVector xs; 
     int index = 1; 
@@ -83,6 +108,11 @@ pair<ValueVector, int> Decoder::decodeList(const string& s) {
     return pair<ValueVector, int>(xs, index);
 }
 
+/// <summary>
+/// Function accepts a string in Bencode format and returns the decoded dictionary and the index for the next decoding.
+/// </summary>
+/// <param name="s ->">String for decoding.</param>
+/// <returns>Decoded dictionary and index for next decoding.</returns>
 pair<ValueDictionary, int> Decoder::decodeDict(const string& s) {
     ValueDictionary dict; 
     int index = 1; 
@@ -110,6 +140,11 @@ pair<ValueDictionary, int> Decoder::decodeDict(const string& s) {
     return pair<ValueDictionary, int>(dict, index); 
 }
 
+/// <summary>
+/// Function accepts a string and decode it.
+/// </summary>
+/// <param name="s ->">String for decoding.</param>
+/// <returns>Result of decoding.</returns>
 pair<Value, int> Decoder::_decode(const string& s) {
     int index = 0;
 
@@ -152,8 +187,18 @@ pair<Value, int> Decoder::_decode(const string& s) {
     return result;
 }
 
+/// <summary>
+/// Function calls _decode function and returns the first element of the pair.
+/// </summary>
+/// <param name="string ->">String for decoding.</param>
+/// <returns>First element of the pair.</returns>
 Value Decoder::decode(const string& string) {
     return _decode(string).first;
 }
 
+/// <summary>
+/// Function delegates the call to the decodeDict function from the Decoder class and returns the result of this function.
+/// </summary>
+/// <param name="s ->">String for decoding.</param>
+/// <returns>Result of decodeDict.</returns>
 pair<ValueDictionary, int> Dt::decodeDc(const string& s) { return Decoder::decodeDict(s); }
