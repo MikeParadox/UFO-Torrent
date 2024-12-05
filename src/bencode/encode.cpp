@@ -6,6 +6,9 @@
 using namespace bencode;
 using std::string;
 
+/// <summary>
+/// Class Encode Visitor is a visitor for encoding objects of various types according to the BitTorrent format.
+/// </summary>
 class EncodeVisitor : public boost::static_visitor<std::string>
 {
 public:
@@ -46,6 +49,11 @@ public:
     }
 };
 
+/// <summary>
+/// Method calls apply_visitor for the specified value and returns the encoding result.
+/// </summary>
+/// <param name="value ->">EncodeVisitor object for the specified value.</param>
+/// <returns>Result of encoding.</returns>
 string Encoder::encode(const Value& value)
 {
     return boost::apply_visitor(EncodeVisitor(), value);
